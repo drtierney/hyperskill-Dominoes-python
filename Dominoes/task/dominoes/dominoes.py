@@ -21,8 +21,18 @@ else:
 
 domino_snake.append(max_double)
 
-print(f"Stock pieces: {stock}")
-print(f"Computer pieces: {computer}")
-print(f"Player pieces: {player}")
-print(f"Domino snake: {domino_snake}")
-print(f"Status: {status}")
+print("=" * 70)
+print(f"Stock size: {len(stock)}")
+print(f"Computer pieces: {len(computer)}")
+print()
+for piece in domino_snake:
+    print(piece)
+print()
+print("Your pieces:")
+for idx, itm in enumerate(player):
+    print(f"{idx + 1}:{itm}")
+print()
+if status == "player":
+    print("Status: It's your turn to make a move. Enter your command.")
+else:
+    print("Status: Computer is about to make a move. Press Enter to continue...")
