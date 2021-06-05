@@ -1,6 +1,5 @@
 import random
 
-
 domino_snake = []
 
 
@@ -50,17 +49,37 @@ def summary():
 
 def is_valid_move(next_move):
     if p_move.strip("-").isnumeric():
-        if abs(int(next_move)) - 1 < len(player):
-            return True
-    return False
+        return True if abs(int(next_move)) - 1 < len(player) else False
+
+
+def is_legal_move(next_move, current_turn):
+    move = int(next_move)
+    if move > 0:
+        point = domino_snake[-1][1]
+        turn = current_turn[move - 1]
+    elif move < 0:
+        point = domino_snake[0][0]
+        turn = current_turn[abs(move) - 1]
+    else:
+        # 0 is always a legal move
+        return True
+    return True if point in turn else False
 
 
 def make_move(next_move, current_turn):
-    if int(next_move) > 0:
-        domino_snake.append(current_turn.pop(int(next_move) - 1))
-    elif int(next_move) < 0:
-        domino_snake.insert(0, current_turn.pop(int(next_move)))
-    elif int(next_move) == 0:
+    move = int(next_move)
+
+    if move > 0:
+        turn = current_turn.pop(move - 1)
+        if domino_snake[-1][1] != turn[0]:
+            turn = [turn[1], turn[0]]
+        domino_snake.append(turn)
+    elif move < 0:
+        turn = current_turn.pop(abs(move) - 1)
+        if domino_snake[0][0] != turn[1]:
+            turn = [turn[1], turn[0]]
+        domino_snake.insert(0, turn)
+    elif move == 0:
         if len(stock):
             current_turn.append(stock.pop())
 
@@ -70,11 +89,11 @@ def check_game_state():
     if domino_snake[0][0] == domino_snake[-1][-1] and \
             sum(x.count(domino_snake[0][0]) for x in domino_snake) == 8:
         state = "It's a draw"
+    elif len(stock) == 0 and (len(player) > len(computer)):
+        state = "The computer won"
     elif len(player) == 0:
         state = "You won"
     elif len(computer) == 0:
-        state = "The computer won"
-    elif len(stock) == 0 and (len(player) > len(computer)):
         state = "The computer won"
     return state
 
@@ -92,6 +111,11 @@ while True:
         input()
         pieces = len(computer) - 1
         c_move = random.randint(pieces * -1, pieces)
+        is_legal = is_legal_move(c_move, computer)
+        while not is_legal:
+            c_move = random.randint(pieces * -1, pieces)
+            is_legal = is_legal_move(c_move, computer)
+
         make_move(c_move, computer)
         summary()
         current_move = "player"
@@ -99,10 +123,18 @@ while True:
     if current_move == "player":
         print("Status: It's your turn to make a move. Enter your command.")
         p_move = input()
-        while not is_valid_move(p_move):
-            print("Invalid input. Please try again.")
+        while True:
+            is_valid = is_valid_move(p_move)
+            if is_valid:
+                is_legal = is_legal_move(p_move, player)
+                if is_legal:
+                    break
+                else:
+                    print("Illegal move. Please try again.")
+            else:
+                print("Invalid input. Please try again.")
             p_move = input()
-            is_valid_move(p_move)
+
         make_move(p_move, player)
         summary()
         current_move = "computer"
